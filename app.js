@@ -87,7 +87,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "http://localhost:3124/auth/google/blog",
+      callbackURL: "https://red-spotless-frog.cyclic.app/auth/google/blog",
       userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
     },
     function (accessToken, refreshToken, profile, cb) {
@@ -133,7 +133,6 @@ app.get("/login", function (req, res) {
 });
 
 app.get("/blog", function (req, res) {
-  console.log(!(req.isAuthenticated()));
   if (req.isAuthenticated()) {
     Post.find({}, function (err, posts) {
       res.render("home", {
