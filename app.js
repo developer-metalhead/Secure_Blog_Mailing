@@ -36,12 +36,12 @@ app.enable("trust proxy");
 app.use(
   session({
     secret: "Ourlittlesecret.",
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     proxy: true,
     store: MongoStore.create({
       mongoUrl:
-        "mongodb+srv://admin-satwik:satwik@cluster0.bzlemkr.mongodb.net/test?retryWrites=true&w=majority",
+        process.env.MONGO_URL,
     }),
     cookie: {
       secure: true,
@@ -62,7 +62,6 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String,
   googleId: String,
-  secret: [String],
 });
 userSchema.plugin(passportLocalMongoose);
 userSchema.plugin(findOrCreate);
@@ -83,54 +82,46 @@ passport.deserializeUser(function (user, cb) {
   });
 });
 
-// passport.use(
-//   new GoogleStrategy(
-//     {
-//       clientID: process.env.CLIENT_ID,
-//       clientSecret: process.env.CLIENT_SECRET,
-//       callbackURL: "https://gray-gentle-tick.cyclic.app/auth/google/secrets",
-//       userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
-//     },
-//     function (accessToken, refreshToken, profile, cb) {
-//       console.log(profile);
-//       User.findOrCreate(
-//         { username: profile.displayName, googleId: profile.id },
-//         function (err, user) {
-//           return cb(err, user);
-//         }
-//       );
-//     }
-//   )
-// );
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: "http://localhost:3124/auth/google/blog",
+      userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
+    },
+    function (accessToken, refreshToken, profile, cb) {
+      console.log(profile);
+      User.findOrCreate(
+        { username: profile.displayName, googleId: profile.id },
+        function (err, user) {
+          return cb(err, user);
+        }
+      );
+    }
+  )
+);
 
 app.get("/", function (req, res) {
   res.render("splash");
 });
 
 
-app.get("/blog", function (req, res) {
-  Post.find({}, function (err, posts) {
-    res.render("home", {
-      startingContent: homeStartingContent,
-      posts: posts,
-    });
-  });
-});
 
 
-// app.get(
-//   "/auth/google",
-//   passport.authenticate("google", { scope: ["profile"] })
-// );
 
-// app.get(
-//   "/auth/google/secrets",
-//   passport.authenticate("google", { failureRedirect: "/login" }),
-//   function (req, res) {
-//     // Successful authentication, redirect to secrets.
-//     res.redirect("/secrets");
-//   }
-// );
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile"] })
+);
+
+app.get(
+  "/auth/google/blog",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  function (req, res) {
+    res.redirect("/blog");
+  }
+);
 
 
 app.get("/register", function (req, res) {
@@ -142,20 +133,20 @@ app.get("/login", function (req, res) {
 });
 
 app.get("/blog", function (req, res) {
+  console.log(!(req.isAuthenticated()));
   if (req.isAuthenticated()) {
-    User.find({ secret: { $ne: null } })
-      .then((foundUsers) => {
-        if (foundUsers) {
-          res.render("home", { usersWithSecrets: foundUsers });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
+    Post.find({}, function (err, posts) {
+      res.render("home", {
+        startingContent: homeStartingContent,
+        posts: posts,
       });
-  } else {
+    });
+  }
+   else {
     res.redirect("/login");
   }
 });
+
 
 
 
@@ -202,26 +193,8 @@ app.post("/login", function (req, res) {
   });
 });
 
-app.post("/submit", function (req, res) {
-  const submittedSecret = req.body.secret;
 
-  User.findById(req.user.id)
-    .then((foundUser) => {
-      if (foundUser) {
-        foundUser.secret.push(submittedSecret);
-        foundUser.save().then(() => {
-          res.redirect("/blog");
-        });
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
 
-app.listen(process.env.PORT || 7000, function () {
-  console.log("Server started successfully");
-});
 
 
 
@@ -311,6 +284,7 @@ app.post("/failure", function (req, res) {
   res.redirect("/");
 });
 
-app.listen(process.env.PORT || 3000, function () {
+
+app.listen(process.env.PORT || 3124, function () {
   console.log("Server started successfully");
 });

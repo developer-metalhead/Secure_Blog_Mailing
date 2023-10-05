@@ -1,20 +1,21 @@
 
 <%- include("partials/headerblog"); -%>
 
- <div class="blog-text">  <h1>Welcome User</h1>
-  <p> <%= startingContent %> </p></div>
+ <div class="blog-text">  <h1>Welcome to LifeInk</h1>
+  <p> <%= startingContent %> </p><br></div>
   
-<div class="blog-text">
-  <%  posts.forEach(function(post){ %>
 
+  <%  posts.forEach(function(post){ %>
+    <div class="blog-text">
     <h1><%=post.title%></h1>
     <p>
     <%=post.content.substring(0, 100) + " ..."%>
     <a href="/posts/<%=post._id%>">Read More</a>
     </p>
+  </div>
 
 
-    <% }) %></div>
+    <% }) %>
 
 
 
