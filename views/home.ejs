@@ -1,10 +1,10 @@
 
-<%- include("partials/header"); -%>
+<%- include("partials/headerblog"); -%>
 
-    <h1>Home</h1>
-    <p> <%= startingContent %> </p>
-
-
+ <div class="blog-text">  <h1>Welcome User</h1>
+  <p> <%= startingContent %> </p></div>
+  
+<div class="blog-text">
   <%  posts.forEach(function(post){ %>
 
     <h1><%=post.title%></h1>
@@ -14,8 +14,8 @@
     </p>
 
 
-    <% }) %>
+    <% }) %></div>
 
-<button type="button" class="btn btn-light"><a href="/compose">Compose Blog</a></button>
 
-<%- include("partials/footer"); -%>
+
+<%- include("partials/footerblog"); -%>
