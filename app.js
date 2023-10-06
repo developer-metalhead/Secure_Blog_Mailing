@@ -7,12 +7,13 @@ const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const FacebookStrategy = require("passport-facebook").Strategy;
 const findOrCreate = require("mongoose-findorcreate");
 const dotenv = require("dotenv");
 dotenv.config();
 const cookieParser = require("cookie-parser");
 const MongoStore = require("connect-mongo");
+const request = require("request");
+const https = require("https");
 
 mongoose.connect(process.env.MONGO_URL, {
   useNewUrlParser: true,
@@ -133,7 +134,7 @@ app.get("/login", function (req, res) {
 });
 
 app.get("/blog", function (req, res) {
-  if (req.isAuthenticated()) {
+  if (!req.isAuthenticated()) {
     Post.find({}, function (err, posts) {
       res.render("home", {
         startingContent: homeStartingContent,
@@ -282,6 +283,6 @@ app.post("/failure", function (req, res) {
 });
 
 
-app.listen(process.env.PORT || 3124, function () {
+app.listen(process.env.PORT || 3000, function () {
   console.log("Server started successfully");
 });
