@@ -134,7 +134,7 @@ app.get("/login", function (req, res) {
 });
 
 app.get("/blog", function (req, res) {
-  if (!req.isAuthenticated()) {
+  if (req.isAuthenticated()) {
     Post.find({}, function (err, posts) {
       res.render("home", {
         startingContent: homeStartingContent,
